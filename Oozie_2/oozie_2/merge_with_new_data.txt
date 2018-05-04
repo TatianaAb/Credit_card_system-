@@ -1,0 +1,35 @@
+CREATE TABLE reporting_table AS
+SELECT table_1.* FROM
+    (SELECT * FROM branch_incremental
+     UNION ALL
+     SELECT * from cdw_sapp_branch) table_1
+JOIN
+    (SELECT branch_code, max(last_updated) max_updated FROM
+        (SELECT * FROM branch_incremental
+         UNION ALL
+         SELECT * from cdw_sapp_branch) t
+     GROUP BY t.branch_code) table_2
+ON table_1.branch_code = table_2.branch_code AND table_1.last_updated = table_2.max_updated;
+
+INSERT OVERWRITE TABLE cdw_sapp_branch SELECT * FROM reporting_table;
+
+drop table branch_incremental;
+drop table reporting_table;
+
+CREATE TABLE reporting_table AS
+SELECT table_1.* FROM
+    (SELECT * FROM customer_incremental
+     UNION ALL
+     SELECT * from cdw_sapp_customer) table_1
+JOIN
+    (SELECT cust_ssn, max(last_updated) max_updated FROM
+        (SELECT * FROM customer_incremental
+         UNION ALL
+         SELECT * from cdw_sapp_customer) t
+     GROUP BY t.cust_ssn) table_2
+ON table_1.cust_ssn = table_2.cust_ssn AND table_1.last_updated = table_2.max_updated;
+
+INSERT OVERWRITE TABLE cdw_sapp_customer SELECT * FROM reporting_table;
+
+drop table customer_incremental;
+drop table reporting_table;

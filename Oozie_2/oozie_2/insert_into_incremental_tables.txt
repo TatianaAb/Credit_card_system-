@@ -1,0 +1,40 @@
+CREATE TABLE branch_incremental
+ ( branch_code int, 
+   branch_name VARCHAR(25),
+   branch_street VARCHAR(30),
+   branch_city VARCHAR(30),
+   branch_state VARCHAR(30),
+   branch_zip int,
+   branch_phone VARCHAR(13),
+   last_updated TIMESTAMP ) 
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY ','
+STORED AS TEXTFILE;
+
+load data inpath "/user/maria_dev/CDW_SAPP_BRANCH" OVERWRITE into table branch_incremental;
+
+create TABLE customer_incremental 
+(  CUST_SSN int,
+   CUST_F_NAME VARCHAR(40),
+   CUST_M_NAME VARCHAR(40),
+   CUST_L_NAME VARCHAR(40),  
+   CUST_CC_NO String,
+   CUST_STREET VARCHAR(38),
+   CUST_CITY VARCHAR(30),
+   CUST_STATE VARCHAR(30),
+   CUST_COUNTRY VARCHAR(30),
+   CUST_ZIP int,
+   CUST_PHONE VARCHAR(8),
+   CUST_EMAIL VARCHAR(40),
+   LAST_UPDATED TIMESTAMP ) 
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY ','
+STORED AS TEXTFILE;
+
+load data inpath "/user/maria_dev/CDW_SAPP_CUSTOMER" OVERWRITE into table customer_incremental; 
+
+
+
+
+
+

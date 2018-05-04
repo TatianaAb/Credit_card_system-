@@ -1,0 +1,83 @@
+<workflow-app xmlns = "uri:oozie:workflow:0.2" name = "Extracting and modifying data from SQL">
+<start to = "Execute_Branch_SqoopJob" />
+
+ <action name="Execute_Branch_SqoopJob">
+    <sqoop xmlns="uri:oozie:sqoop-action:0.2">
+        <job-tracker>${jobTracker}</job-tracker>
+        <name-node>${nameNode}</name-node>
+        <command>job --exec branchSqoopJob --meta-connect jdbc:hsqldb:hsql://localhost:16000/sqoop</command>
+        <archive>${javaJarPath}</archive>
+    </sqoop>
+   <ok to="Execute_Customer_SqoopJob"/>
+   <error to = "kill_job" />
+  </action>
+
+  <action name="Execute_Customer_SqoopJob">
+    <sqoop xmlns="uri:oozie:sqoop-action:0.2">
+        <job-tracker>${jobTracker}</job-tracker>
+        <name-node>${nameNode}</name-node>
+        <command>job --exec customerSqoopJob --meta-connect jdbc:hsqldb:hsql://localhost:16000/sqoop</command>
+        <archive>${javaJarPath}</archive>
+    </sqoop>
+   <ok to="Base_Tables_Exist"/>
+   <error to = "kill_job" />
+  </action>
+
+   <decision name = "Base_Tables_Exist">
+      <switch>
+         <case to = "Execute_CC_SqoopJob">
+            ${fs:exists('/user/maria_dev/Credit_Card_System/tables') eq 'false'}</case>
+         <default to = "Insert_into_Incremental_Tables" />
+      </switch>
+  </decision>
+
+<action name="Execute_CC_SqoopJob">
+    <sqoop xmlns="uri:oozie:sqoop-action:0.2">
+        <job-tracker>${jobTracker}</job-tracker>
+        <name-node>${nameNode}</name-node>
+        <command>job --exec ccSqoopJob --meta-connect jdbc:hsqldb:hsql://localhost:16000/sqoop</command>
+        <archive>${javaJarPath}</archive>
+    </sqoop>
+   <ok to="Create_Base_Tables"/>
+   <error to = "kill_job" />
+</action>
+
+ <action name = "Create_Base_Tables">
+ <hive xmlns = "uri:oozie:hive-action:0.4">
+ <job-tracker>${jobTracker}</job-tracker>
+ <name-node>${nameNode}</name-node>
+ <script>${createBaseTables}</script>
+ </hive>
+ <ok to = "Insert_into_Incremental_Tables" />
+ <error to = "kill_job" />
+ </action>
+
+ <action name = "Insert_into_Incremental_Tables">
+ <hive xmlns = "uri:oozie:hive-action:0.4">
+ <job-tracker>${jobTracker}</job-tracker>
+ <name-node>${nameNode}</name-node>
+ <script>${insertIncrementalTables}</script>
+ </hive>
+ <ok to = "Merge_with_new_data" />
+ <error to = "kill_job" />
+ </action>
+
+
+ <action name = "Merge_with_new_data">
+ <hive xmlns = "uri:oozie:hive-action:0.4">
+ <job-tracker>${jobTracker}</job-tracker>
+ <name-node>${nameNode}</name-node>
+ <script>${mergeData}</script>
+ </hive>
+ <ok to = "end" />
+ <error to = "kill_job" />
+ </action>
+
+
+ <kill name = "kill_job">
+ <message>Job failed</message>
+ </kill>
+
+ <end name = "end" />
+
+</workflow-app>

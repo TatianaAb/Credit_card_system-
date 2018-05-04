@@ -1,0 +1,83 @@
+<workflow-app xmlns = "uri:oozie:workflow:0.2" name = "Extracting and modifying date from SQL">
+<start to = "Importing_data_into_HDFS" />
+
+ <action name="Importing_data_into_HDFS">
+    <sqoop xmlns="uri:oozie:sqoop-action:0.2">
+        <job-tracker>${jobTracker}</job-tracker>
+        <name-node>${nameNode}</name-node>
+         <prepare>
+                <delete path="hdfs://sandbox.hortonworks.com:8020/user/maria_dev/CDW_SAPP_BRANCH"/>
+                <delete path="hdfs://sandbox.hortonworks.com:8020/user/maria_dev/CDW_SAPP_CREDITCARD"/>
+                <delete path="hdfs://sandbox.hortonworks.com:8020/user/maria_dev/CDW_SAPP_CUSTOMER"/>
+         </prepare>
+         <arg>import-all-tables</arg>
+         <arg>--connect</arg>
+         <arg>jdbc:mysql://localhost/CDW_SAPP</arg>         
+         <arg>--driver</arg>       
+         <arg>com.mysql.jdbc.Driver</arg>
+         <arg>-m</arg>
+         <arg>1</arg>
+    </sqoop>
+   <ok to="Create_Branch_Table"/>
+   <error to="kill_job"/>
+  </action>
+
+ <action name = "Create_Branch_Table">
+ <hive xmlns = "uri:oozie:hive-action:0.4">
+ <job-tracker>${jobTracker}</job-tracker>
+ <name-node>${nameNode}</name-node>
+ <script>${nameNode}/user/maria_dev/Credit_Card_System/oozie/external_branch.txt</script>
+ </hive>
+ <ok to = "Create_Credicard_Table" />
+ <error to = "kill_job" />
+ </action>
+
+
+ <action name = "Create_Credicard_Table">
+ <hive xmlns = "uri:oozie:hive-action:0.4">
+ <job-tracker>${jobTracker}</job-tracker>
+ <name-node>${nameNode}</name-node>
+ <script>${nameNode}/user/maria_dev/Credit_Card_System/oozie/external_creditcard.txt</script>
+ </hive>
+ <ok to = "Create_Customer_Table" />
+ <error to = "kill_job" />
+ </action>
+
+ <action name = "Create_Customer_Table">
+ <hive xmlns = "uri:oozie:hive-action:0.4">
+ <job-tracker>${jobTracker}</job-tracker>
+ <name-node>${nameNode}</name-node>
+ <script>${nameNode}/user/maria_dev/Credit_Card_System/oozie/external_customer.txt</script>
+ </hive>
+ <ok to = "Create_Time_Table" />
+ <error to = "kill_job" />
+ </action>
+
+ <action name = "Create_Time_Table">
+ <hive xmlns = "uri:oozie:hive-action:0.4">
+ <job-tracker>${jobTracker}</job-tracker>
+ <name-node>${nameNode}</name-node>
+ <script>${nameNode}/user/maria_dev/Credit_Card_System/oozie/external_time.txt</script>
+ </hive>
+ <ok to = "Insert_into_Time_Table" />
+ <error to = "kill_job" />
+ </action>
+
+ <action name = "Insert_into_Time_Table">
+ <hive xmlns = "uri:oozie:hive-action:0.4">
+ <job-tracker>${jobTracker}</job-tracker>
+ <name-node>${nameNode}</name-node>
+ <script>${nameNode}/user/maria_dev/Credit_Card_System/oozie/insert_time.txt</script>
+
+ </hive>
+ <ok to = "end" />
+ <error to = "kill_job" />
+ </action>
+
+ <kill name = "kill_job">
+ <message>Job failed</message>
+ </kill>
+
+ <end name = "end" />
+
+</workflow-app>

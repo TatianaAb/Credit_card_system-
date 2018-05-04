@@ -1,0 +1,10 @@
+
+
+-----------------Importing data from SQL server into HDFS --------------------------
+
+[root@sandbox ~]#  sqoop import-all-tables
+--connect jdbc:mysql://localhost/CDW_SAPP 
+--driver com.mysql.jdbc.Driver
+-m 1
+------------------------------------------------------------------------------------
+

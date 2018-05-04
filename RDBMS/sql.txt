@@ -1,0 +1,12 @@
+
+--------------------- mysql login to load database if not there --------------------
+
+[root@sandbox ~]# mysql -u root -p;
+mysql>  show databases;
+mysql>  source CDW_SAPP; -- if not loaded yet
+mysql>  use CDW_SAPP;
+mysql>  show tables;
+mysql>  alter table CDW_SAPP_BRANCH ADD COLUMN (last_updated timestamp default current_timestamp on update current_timestamp);
+mysql>  alter table CDW_SAPP_CUSTOMER ADD COLUMN (last_updated timestamp default current_timestamp on update current_timestamp);
+mysql>  exit;
+------------------------------------------------------------------------------------

@@ -1,0 +1,11 @@
+drop table cdw_sapp_time;
+
+create EXTERNAL TABLE cdw_sapp_time 
+( TIMEID VARCHAR(8),
+  DAY INT,
+  MONTH INT,
+  QUARTER VARCHAR(8),
+  YEAR INT)
+STORED AS TEXTFILE
+location "/user/maria_dev/Credit_Card_System/CDW_SAPP_TIME";
+

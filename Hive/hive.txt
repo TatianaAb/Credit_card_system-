@@ -1,0 +1,124 @@
+
+------------ create schema for cdw_sapp_branch table and directory if it doesn't exist ----------------------------------------------------
+
+drop table cdw_sapp_branch;
+
+create EXTERNAL table cdw_sapp_branch
+ ( branch_code int, 
+   branch_name VARCHAR(25),
+   branch_street VARCHAR(30),
+   branch_city VARCHAR(30),
+   branch_state VARCHAR(30),
+   branch_zip int,
+   branch_phone VARCHAR(13),
+   last_updated TIMESTAMP ) 
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY ','
+STORED AS TEXTFILE
+location "/user/maria_dev/Credit_Card_System/CDW_SAPP_BRANCH";
+
+
+
+
+--------------------------------- load data into cdw_sapp_branch table   ------------------------------------------------------------------
+
+load data inpath "/user/root/CDW_SAPP_BRANCH" OVERWRITE into table cdw_sapp_branch; 
+
+
+
+------------ create schema for cdw_sapp_creditcard table and directory if it doesn't exist -------------------------------------------------
+
+
+drop table cdw_sapp_creditcard;
+
+create EXTERNAL table cdw_sapp_creditcard
+ ( TRANSACTION_ID int, 
+   day int,
+   month int,
+   year int,
+   CREDIT_CARD_NO String,
+   CUST_SSN int,
+   BRANCH_CODE int,
+   TRANSACTION_TYPE String, 
+   TRANSACTION_VALUE decimal,
+   last_updated TIMESTAMP) 
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY ','
+STORED AS TEXTFILE
+location "/user/maria_dev/Credit_Card_System/CDW_SAPP_CREDITCARD"; 
+
+
+
+--------------------------------- load data into cdw_sapp_creditcard table   ----------------------------------------------------------------
+
+load data inpath "/user/root/CDW_SAPP_CREDITCARD" OVERWRITE into table cdw_sapp_creditcard; 
+
+
+
+----------------- create schema for cdw_sapp_customer table and directory if it doesn't exist ------------------------------------------------
+
+
+drop table cdw_sapp_customer;
+
+create EXTERNAL table cdw_sapp_customer
+ ( FIRST_NAME String,
+   MIDDLE_NAME String,
+   LAST_NAME String,
+   SSN int,
+   CREDIT_CARD_NO String,
+   APT_NO String,
+   STREET_NAME String,
+   CUST_CITY String,
+   CUST_STATE String,
+   CUST_COUNTRY String,
+   CUST_ZIP String,
+   CUST_PHONE int, 
+   CUST_EMAIL String,
+   last_updated TIMESTAMP ) 
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY ','
+STORED AS TEXTFILE
+location "/user/maria_dev/Credit_Card_System/CDW_SAPP_CUSTOMER"; 
+
+
+--------------------------------- load data into cdw_sapp_customer table -----------------------------------------------------------------
+
+
+load data inpath "/user/root/CDW_SAPP_CUSTOMER" OVERWRITE into table cdw_sapp_customer;  
+
+
+
+------------------------------- Create cdw_sapp_time table in hive------------------------------------------------------------------------
+
+drop table cdw_sapp_time;
+
+create EXTERNAL TABLE cdw_sapp_time 
+( TIMEID VARCHAR(8),
+  DAY INT,
+  MONTH INT,
+  QUARTER VARCHAR(8),
+  YEAR INT)
+STORED AS TEXTFILE
+location "/user/maria_dev/Credit_Card_System/CDW_SAPP_TIME";
+
+
+
+---------------------- Populate cdw_sapp_time table with data from  cdw_sapp_creditcard----------------------------------------------------
+
+
+insert overwrite table cdw_sapp_time
+SELECT
+   timeid,
+   substring(timeid, 7, 2) AS day, 
+   substring(timeid, 5, 2) AS month,
+   (case 
+    when substring(timeid, 5, 2) BETWEEN 1 AND 3 then "Q1" 
+    when substring(timeid, 5, 2) BETWEEN 4 AND 6 then "Q2" 
+    when substring(timeid, 5, 2) BETWEEN 7 AND 9 then "Q3" 
+    when substring(timeid, 5, 2) BETWEEN 10 AND 12 then "Q4" 
+    end) quarter,
+    substring(timeid, 1, 4) AS year 
+from cdw_sapp_creditcard;
+
+
+---------------------------------------------------------------------------------------------------------------------------------------------

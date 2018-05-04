@@ -1,0 +1,17 @@
+drop table cdw_sapp_branch;
+
+create EXTERNAL table cdw_sapp_branch
+ ( branch_code int, 
+   branch_name VARCHAR(25),
+   branch_street VARCHAR(30),
+   branch_city VARCHAR(30),
+   branch_state VARCHAR(30),
+   branch_zip int,
+   branch_phone VARCHAR(13),
+   last_updated TIMESTAMP ) 
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY ','
+STORED AS TEXTFILE
+location "/user/maria_dev/Credit_Card_System/CDW_SAPP_BRANCH";
+
+load data inpath "/user/root/CDW_SAPP_BRANCH" OVERWRITE into table cdw_sapp_branch; 

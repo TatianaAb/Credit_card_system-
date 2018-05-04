@@ -1,0 +1,23 @@
+drop table cdw_sapp_customer;
+
+create EXTERNAL table cdw_sapp_customer
+ ( FIRST_NAME String,
+   MIDDLE_NAME String,
+   LAST_NAME String,
+   SSN int,
+   CREDIT_CARD_NO String,
+   APT_NO String,
+   STREET_NAME String,
+   CUST_CITY String,
+   CUST_STATE String,
+   CUST_COUNTRY String,
+   CUST_ZIP String,
+   CUST_PHONE int, 
+   CUST_EMAIL String,
+   last_updated TIMESTAMP ) 
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY ','
+STORED AS TEXTFILE
+location "/user/maria_dev/Credit_Card_System/CDW_SAPP_CUSTOMER"; 
+
+load data inpath "/user/root/CDW_SAPP_CUSTOMER" OVERWRITE into table cdw_sapp_customer; 

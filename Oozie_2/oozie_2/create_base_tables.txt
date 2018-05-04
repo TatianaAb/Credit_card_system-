@@ -1,0 +1,77 @@
+drop table cdw_sapp_branch;
+
+create EXTERNAL table cdw_sapp_branch
+ ( branch_code int, 
+   branch_name VARCHAR(25),
+   branch_street VARCHAR(30),
+   branch_city VARCHAR(30),
+   branch_state VARCHAR(30),
+   branch_zip int,
+   branch_phone VARCHAR(13),
+   last_updated TIMESTAMP ) 
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY ','
+STORED AS TEXTFILE
+location "/user/maria_dev/Credit_Card_System/tables/CDW_SAPP_BRANCH";
+
+drop table cdw_sapp_customer;
+ 
+create EXTERNAL TABLE cdw_sapp_customer 
+(  CUST_SSN int,
+   CUST_F_NAME VARCHAR(40),
+   CUST_M_NAME VARCHAR(40),
+   CUST_L_NAME VARCHAR(40),  
+   CUST_CC_NO String,
+   CUST_STREET VARCHAR(38),
+   CUST_CITY VARCHAR(30),
+   CUST_STATE VARCHAR(30),
+   CUST_COUNTRY VARCHAR(30),
+   CUST_ZIP int,
+   CUST_PHONE VARCHAR(8),
+   CUST_EMAIL VARCHAR(40),
+   LAST_UPDATED TIMESTAMP ) 
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY ','
+STORED AS TEXTFILE
+location "/user/maria_dev/Credit_Card_System/tables/CDW_SAPP_CUSTOMER";
+
+drop table cdw_sapp_creditcard;
+
+create EXTERNAL TABLE cdw_sapp_creditcard
+(  CUST_CC_NO String,
+   TIMEID VARCHAR(8),   
+   CUST_SSN int,
+   BRANCH_CODE int,
+   TRANSACTION_TYPE VARCHAR(30),
+   TRANSACTION_VALUE decimal(20,3) ) 
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY ','
+STORED AS TEXTFILE
+location "/user/maria_dev/Credit_Card_System/tables/CDW_SAPP_CREDITCARD";
+load data inpath "/user/maria_dev/CDW_SAPP_CREDITCARD" OVERWRITE into table cdw_sapp_creditcard; 
+
+drop table CDW_SAPP_TIME;
+
+create EXTERNAL TABLE CDW_SAPP_TIME 
+( TIMEID VARCHAR(8),
+  DAY INT,
+  MONTH INT,
+  QUARTER VARCHAR(8),
+  YEAR INT)
+STORED AS TEXTFILE
+location "/user/maria_dev/Credit_Card_System/tables/CDW_SAPP_TIME";
+
+insert overwrite table CDW_SAPP_TIME
+SELECT
+   timeid,
+
+   substring(timeid, 7, 2) AS day, 
+   substring(timeid, 5, 2) AS month,
+   (case 
+    when substring(timeid, 5, 2) BETWEEN 1 AND 3 then "Q1" 
+    when substring(timeid, 5, 2) BETWEEN 4 AND 6 then "Q2" 
+    when substring(timeid, 5, 2) BETWEEN 7 AND 9 then "Q3" 
+    when substring(timeid, 5, 2) BETWEEN 10 AND 12 then "Q4" 
+    end) quarter,
+    substring(timeid, 1, 4) AS year 
+from cdw_sapp_creditcard;

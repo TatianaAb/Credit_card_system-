@@ -1,0 +1,13 @@
+insert overwrite table cdw_sapp_time
+SELECT
+   timeid,
+   substring(timeid, 7, 2) AS day, 
+   substring(timeid, 5, 2) AS month,
+   (case 
+    when substring(timeid, 5, 2) BETWEEN 1 AND 3 then "Q1" 
+    when substring(timeid, 5, 2) BETWEEN 4 AND 6 then "Q2" 
+    when substring(timeid, 5, 2) BETWEEN 7 AND 9 then "Q3" 
+    when substring(timeid, 5, 2) BETWEEN 10 AND 12 then "Q4" 
+    end) quarter,
+    substring(timeid, 1, 4) AS year 
+from cdw_sapp_creditcard;
