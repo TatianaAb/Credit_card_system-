@@ -1,8 +1,8 @@
-# Credit_card_system Hadoop Credit Card System 
+# Hadoop based Credit Card managment system
 
 1 Core Java
 
-Core_Java
+Java Eclipse Project 
 
 
 2.1.3	RDBMS/mySQL data transformation
